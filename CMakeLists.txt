@@ -1,12 +1,6 @@
-project(pxtone)
+project(pxtone-engine LANGUAGES CXX)
 
-set(PXTONE_LIB ${PROJECT_NAME})
-# let parent use this target
-set(PXTONE_LIB ${PXTONE_LIB} PARENT_SCOPE)
-
-find_package(Vorbis)
-
-list(APPEND PXTONE_SRCS
+set(PROJECT_SOURCES
     pxtnData.cpp
     pxtnDelay.cpp
     pxtnError.cpp
@@ -30,27 +24,37 @@ list(APPEND PXTONE_SRCS
     pxtoneNoise.cpp
 )
 
-add_library(${PXTONE_LIB} STATIC
-    ${PXTONE_SRCS}
+set(PROJECT_HEADERS
+    pxtn.h
+    pxtnData.h
+    pxtnDelay.h
+    pxtnError.h
+    pxtnEvelist.h
+    pxtnMaster.h
+    pxtnMax.h
+    pxtnMem.h
+    pxtnOverDrive.h
+    pxtnPulse_Frequency.h
+    pxtnPulse_Noise.h
+    pxtnPulse_NoiseBuilder.h
+    pxtnPulse_Oggv.h
+    pxtnPulse_Oscillator.h
+    pxtnPulse_PCM.h
+    pxtnService.h
+    pxtnText.h
+    pxtnUnit.h
+    pxtnWoice.h
+    pxtoneNoise.h
 )
 
-target_include_directories(${PXTONE_LIB}
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
+# TODO: add config for static pxtone library
+add_pxtone_library(${PROJECT_NAME} SHARED "${PROJECT_SOURCES};${PROJECT_HEADERS}" ${VORBISFILE_LIBRARY})
 
-target_link_libraries(${PXTONE_LIB}
-    PRIVATE
-    ${FIXENDIAN_LIB}
-)
-
-if(Vorbis_FOUND)
-    target_compile_definitions(${PXTONE_LIB}
-        PRIVATE
-        pxINCLUDE_OGGVORBIS
-    )
-    target_link_libraries(${PXTONE_LIB}
-        PRIVATE
-        Vorbis::vorbisfile
-    )
+if(VORBISFILE_LIBRARY)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE pxINCLUDE_OGGVORBIS)
 endif()
+
+# Export
+# ---------------
+
+add_library(pxtone::pxtone ALIAS ${PROJECT_NAME})
